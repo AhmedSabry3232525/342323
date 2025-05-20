@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>كورساتى</title>
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf_viewer.min.css">
+</head>
+<body oncontextmenu="return false;" class="android-enhanced">
+    <div id="loading-screen" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.9); z-index: 2000; display: flex; justify-content: center; align-items: center;">
+        <div style="text-align: center;">
+            <div class="spinner" style="width: 50px; height: 50px; border: 5px solid #ccc; border-top: 5px solid #1a73e8; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <p style="margin-top: 10px; font-size: 18px; color: #555;">جارٍ التحميل...</p>
+        </div>
+    </div>
+    <style>
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+    <div id="registration-page" style="text-align: center; padding: 20px;">
+        <!-- أزرار التبديل بين النماذج -->
+        <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 20px;">
+            <button id="show-register-form-btn" style="padding: 10px 25px; font-size: 16px; font-weight: bold; background: #1a73e8; color: white; border: none; border-radius: 5px; cursor: pointer;">تسجيل حساب جديد</button>
+            <button id="show-login-form-btn" style="padding: 10px 25px; font-size: 16px; font-weight: bold; background: #34a853; color: white; border: none; border-radius: 5px; cursor: pointer;">تسجيل الدخول</button>
+        </div>
+        <!-- نموذج تسجيل الحساب -->
+        <div id="register-form" style="max-width: 400px; margin: 0 auto; position: relative;">
+            <input type="text" id="signup-name" placeholder="ادخل اسمك الثنائي (الاسم الأول والأخير)" style="width: 100%; padding: 10px; margin: 10px 0;">
+            <input type="email" id="signup-email" placeholder="البريد الإلكتروني" style="width: 100%; padding: 10px; margin: 10px 0;">
+            <div style="position:relative;">
+                <input type="password" id="signup-password" placeholder="كلمة المرور" style="width: 100%; padding: 10px; margin: 10px 0;">
+                <button type="button" onclick="togglePassword('signup-password', this)" tabindex="-1" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.2em;">🔒</button>
+            </div>
+            <div style="position:relative;">
+                <input type="password" id="signup-password-confirm" placeholder="تأكيد كلمة المرور" style="width: 100%; padding: 10px; margin: 10px 0;">
+                <button type="button" onclick="togglePassword('signup-password-confirm', this)" tabindex="-1" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.2em;">🔒</button>
+            </div>
+            <!-- رسالة توضيحية لرقم الهاتف -->
+            <div style="margin: 10px 0; background: #e3f2fd; border: 1.5px solid #90caf9; border-radius: 7px; padding: 10px 8px; box-shadow: 0 2px 8px #90caf944; color: #1565c0; font-size: 15px;">
+                <span style="font-weight:bold;">تنبيه:</span>
+                تأكد من إدخال رقم الهاتف الصحيح، لأنه سيتم التواصل معك عليه في حالة حدوث مشاكل في التسجيل أو استرجاع الحساب.
+            </div>
+            <input type="text" id="signup-phone" placeholder="رقم الهاتف" style="width: 100%; padding: 10px; margin: 10px 0;">
+            <!-- تاريخ الميلاد: رسالة توضيحية وحقول احترافية -->
+            <div style="margin: 10px 0; background: #fffbe7; border: 1.5px solid #ffe082; border-radius: 7px; padding: 10px 8px; box-shadow: 0 2px 8px #ffe08244;">
+                <span style="color:#d32f2f; font-weight:bold;">هام جداً:</span>
+                يرجى إدخال تاريخ ميلادك بدقة. هذا الخيار مهم جداً لاسترجاع حسابك إذا نسيت كلمة المرور مستقبلاً.
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <select id="dob-day" style="flex:1; padding: 10px;">
+                    <option value="">اليوم</option>
+                    <!-- أيام الشهر 1-31 -->
+                    <script>
+                        for(let i=1;i<=31;i++)document.write(`<option value="${i}">${i}</option>`);
+                    </script>
+                </select>
+                <select id="dob-month" style="flex:1; padding: 10px;">
+                    <option value="">الشهر</option>
+                    <option value="1">يناير</option>
+                    <option value="2">فبراير</option>
+                    <option value="3">مارس</option>
+                    <option value="4">إبريل</option>
+                    <option value="5">مايو</option>
+                    <option value="6">يونيو</option>
+                    <option value="7">يوليو</option>
+                    <option value="8">أغسطس</option>
+                    <option value="9">سبتمبر</option>
+                    <option value="10">أكتوبر</option>
+                    <option value="11">نوفمبر</option>
+                    <option value="12">ديسمبر</option>
+                </select>
+                <select id="dob-year" style="flex:1; padding: 10px;">
+                    <option value="">السنة</option>
+                    <script>
+                        const thisYear = new Date().getFullYear();
+                        for(let y=thisYear-10;y>=1950;y--)document.write(`<option value="${y}">${y}</option>`);
+                    </script>
+                </select>
+            </div>
+            <button id="register-button" onclick="registerUser()" style="width: 100%; padding: 10px; background: #1a73e8; color: white; border: none; border-radius: 5px;">تسجيل</button>
+            <button id="restore-account-button" onclick="restoreLastAccount()" style="width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 5px; margin-top: 10px;">استرجاع الحساب الأخير</button>
+            <div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); background: #d1ecf1; color: #0c5460; padding: 10px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); font-size: 14px; text-align: center; width: 300px; margin-top: 10px;">
+                استخدم هذا الخيار فقط إذا كنت قد سجلت من قبل ولم تقم بحذف بيانات التطبيق. وظهرت لك هذه الصفحة فجأة، يمكنك استخدام هذا الخيار. أما إذا لم يسبق لك التسجيل، فيرجى التسجيل أولاً.
+                <div style="position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 10px solid #d1ecf1;"></div>
+            </div>
+        </div>
+        <!-- نموذج تسجيل الدخول -->
+        <div id="login-form" style="max-width: 400px; margin: 0 auto; position: relative; border-top: 1px solid #eee; padding-top: 20px; display: none;">
+            <h2 style="margin-bottom: 10px; font-size: 1.1rem; color: #d32f2f; background: #fffbe7; border-radius: 7px; padding: 10px 8px; border: 1.5px solid #ffe082; box-shadow: 0 2px 8px #ffe08244; font-weight: 600;">
+                <span style="color:#d32f2f; font-weight:bold;">تسجيل الدخول يحتاج موافقة</span> مثل تسجيل حساب جديد<br>
+                <span style="color:#d32f2f; font-weight:bold;">إذا تمت الموافقة</span> سيتم الخروج من الجهاز الآخر و الدخول هنا<br>
+                <span style="color:#d32f2f; font-weight:bold;">إذا لم تتم الموافقة أو ظلت كما هي معلقة</span> سيستمر الجهاز الآخر ولن يخرج
+            </h2>
+            <input type="text" id="login-identifier" placeholder="البريد الإلكتروني أو رقم الهاتف" style="width: 100%; padding: 10px; margin: 10px 0;">
+            <div style="position:relative;">
+                <input type="password" id="login-password" placeholder="كلمة المرور" style="width: 100%; padding: 10px; margin: 10px 0;">
+                <button type="button" onclick="togglePassword('login-password', this)" tabindex="-1" style="position:absolute;top:50%;right:10px;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1.2em;">🔒</button>
+            </div>
+            <button id="login-button" onclick="loginUser()" style="width: 100%; padding: 10px; background: #34a853; color: white; border: none; border-radius: 5px;">دخول</button>
+            <div style="margin-top: 10px;">
+                <a href="#" id="show-forgot-password" style="color:#1a73e8; font-weight:bold; text-decoration:underline; cursor:pointer;">هل نسيت كلمة المرور؟</a>
+            </div>
+        </div>
+        <!-- نموذج استرجاع كلمة المرور -->
+        <div id="forgot-password-form" style="max-width: 400px; margin: 0 auto; position: relative; border-top: 1px solid #eee; padding-top: 20px; display: none;">
+            <h2 style="font-size:1.1rem; color:#d32f2f; background:#fffbe7; border-radius:7px; padding:10px 8px; border:1.5px solid #ffe082; box-shadow:0 2px 8px #ffe08244; font-weight:600;">
+                لاسترجاع كلمة المرور يجب إدخال البريد أو رقم الهاتف وتاريخ الميلاد بدقة
+            </h2>
+            <input type="text" id="forgot-identifier" placeholder="البريد الإلكتروني أو رقم الهاتف" style="width: 100%; padding: 10px; margin: 10px 0;">
+            <div style="margin: 10px 0; background: #fffbe7; border: 1.5px solid #ffe082; border-radius: 7px; padding: 10px 8px; box-shadow: 0 2px 8px #ffe08244;">
+                <span style="color:#d32f2f; font-weight:bold;">هام جداً:</span>
+                يجب إدخال تاريخ الميلاد كما سجلته أول مرة.
+            </div>
+            <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                <select id="forgot-dob-day" style="flex:1; padding: 10px;">
+                    <option value="">اليوم</option>
+                    <script>
+                        for(let i=1;i<=31;i++)document.write(`<option value="${i}">${i}</option>`);
+                    </script>
+                </select>
+                <select id="forgot-dob-month" style="flex:1; padding: 10px;">
+                    <option value="">الشهر</option>
+                    <option value="1">يناير</option>
+                    <option value="2">فبراير</option>
+                    <option value="3">مارس</option>
+                    <option value="4">إبريل</option>
+                    <option value="5">مايو</option>
+                    <option value="6">يونيو</option>
+                    <option value="7">يوليو</option>
+                    <option value="8">أغسطس</option>
+                    <option value="9">سبتمبر</option>
+                    <option value="10">أكتوبر</option>
+                    <option value="11">نوفمبر</option>
+                    <option value="12">ديسمبر</option>
+                </select>
+                <select id="forgot-dob-year" style="flex:1; padding: 10px;">
+                    <option value="">السنة</option>
+                    <script>
+                        const thisYear2 = new Date().getFullYear();
+                        for(let y=thisYear2-10;y>=1950;y--)document.write(`<option value="${y}">${y}</option>`);
+                    </script>
+                </select>
+            </div>
+            <button id="forgot-password-button" onclick="forgotPassword()" style="width: 100%; padding: 10px; background: #1a73e8; color: white; border: none; border-radius: 5px;">استرجاع كلمة المرور</button>
+            <div style="margin-top:10px;">
+                <a href="#" id="back-to-login" style="color:#1a73e8; font-weight:bold; text-decoration:underline; cursor:pointer;">رجوع لتسجيل الدخول</a>
+            </div>
+            <div id="forgot-password-result" style="margin-top:15px; color:#155724; font-weight:bold;"></div>
+        </div>
+    </div>
+
+    <div id="waiting-page" style="display: none; text-align: center; padding: 20px;">
+        <h1>حسابك في انتظار الموافقة</h1>
+        <p>يرجى الانتظار حتى تتم الموافقة على حسابك. تواصل مع المسؤول وارسل لة معلومات حسابك الظاهرة لك فى الأسفل ليقوم بالموافقة على حسابك بعد التأكد ان المسؤول وافق على الحساب اخرج من التطبيق ثم ادخل مرة اخرى سيدخل مباشرة لمحتوى التطبيق.</p>
+        <!-- معلومات الحساب -->
+        <div id="waiting-user-info" style="margin: 30px auto 0 auto; max-width: 350px; background: #f8f9fa; border-radius: 10px; box-shadow: 0 2px 8px #0001; padding: 18px 12px; font-size: 1.15rem; text-align: right; direction: rtl; user-select: text;">
+            <div style="margin-bottom: 10px;">
+                <strong>الاسم:</strong>
+                <span id="waiting-name" style="user-select: text; -webkit-user-select: text; cursor: text;">--</span>
+            </div>
+            <div style="margin-bottom: 10px;">
+                <strong>الإيميل:</strong>
+                <span id="waiting-email" style="user-select: text; -webkit-user-select: text; cursor: text;">--</span>
+            </div>
+            <div>
+                <strong>رقم الهاتف:</strong>
+                <span id="waiting-phone" style="user-select: text; -webkit-user-select: text; cursor: text;">--</span>
+            </div>
+            <button id="copy-waiting-info-btn" style="margin-top:18px; width:100%; padding:10px; background:#1a73e8; color:white; border:none; border-radius:6px; font-size:1.1rem; font-weight:bold; cursor:pointer;">نسخ معلومات الحساب هذا</button>
+            <div id="copy-waiting-info-msg" style="margin-top:8px; color:#388e3c; font-size:1rem; display:none;">تم النسخ!</div>
+        </div>
+    </div>
+
+    <div id="main-content" style="display: none;">
+        <div class="navbar" id="main-navbar">
+            <div style="position: absolute; left: 15px; top: 15px; z-index: 101;">
+                <button id="settings-btn" title="معلومات الحساب" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: #1a73e8;">⚙️</button>
+            </div>
+            <div class="logo-container">
+                <h1 class="logo-text" data-text="كورساتي">كورساتي</h1>
+                <div class="username-container">
+                    <div class="username-text" id="username-display"></div>
+                </div>
+                <div class="sparkle"></div>
+            </div>
+        </div>
+
+        <div class="welcome-container" id="main-welcome">
+            <div class="typewriter-container">
+                <h1 class="typewriter" style="opacity: 1;">مرحباً بك في كورساتى</h1>
+            </div>
+            <img id="welcome-image" src="https://cdn-icons-png.flaticon.com/512/2641/2641333.png" alt="Welcome" class="welcome-image">
+            <div class="typewriter-container">
+                <h2 class="typewriter" style="opacity: 1;">نتمنى لك تجربة تعليمية مميزة</h2>
+            </div>
+            <p id="course-instruction" style="font-size: 1.5rem; color: #34a853; margin-top: 20px; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.2); border: 2px solid #34a853; padding: 10px; border-radius: 8px; background: #f0f9f4; position: relative;">
+                الكورسات مقسمة الى فديوهات و ملفات
+            </p>
+            <div class="main-buttons-row">
+                <button id="show-playlists-btn" style="margin: 30px 10px 0 10px; padding: 12px 28px; font-size: 1.2rem; font-weight: bold; color: white; background: #1a73e8; border: none; border-radius: 8px; cursor: pointer; display: block;">
+                    <span style="display: flex; flex-direction: column; align-items: center;">
+                        <span style="font-size: 3rem; line-height: 1; margin-bottom: 5px; filter: drop-shadow(0 2px 4px #0002);">🎬</span>
+                        الفديوهات
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <!-- صفحة الفيديوهات المستقلة (land page) -->
+        <div id="playlists-landpage" style="display: none;">
+            <h2 id="landpage-title" style="text-align:center; color:#1a73e8; margin-top:30px;">قائمة المجلدات الخاصة بكل كورس فديوهات فقط</h2>
+            <div id="landpage-buttons" style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin: 0 0 20px 0;">
+                <button id="back-button-land" style="display: none; padding: 10px 20px; font-size: 16px; font-weight: bold; color: white; background: #0b3a33; border: none; border-radius: 5px; cursor: pointer; width: fit-content;">رجوع</button>
+                <button id="back-to-main-btn" style="padding: 10px 20px; font-size: 16px; font-weight: bold; color: white; background: #1a73e8; border: none; border-radius: 5px; cursor: pointer; display: block; width: fit-content;">رجوع للصفحة الرئيسية</button>
+            </div>
+            <div class="courses-grid" id="playlists-land"></div>
+            <div class="courses-grid" id="videos-land" style="display: none;"></div>
+            <button id="load-more-button-land" style="display: none; margin: 20px auto; padding: 10px 20px; font-size: 16px; font-weight: bold; color: white; background: #1a73e8; border: none; border-radius: 5px; cursor: pointer;">تحميل المزيد</button>
+        </div>
+
+        <div class="courses-grid" id="playlists" style="display: none;"></div>
+        <div class="courses-grid" id="videos" style="display: none;"></div>
+        <button id="load-more-button" style="display: none; margin: 20px auto; padding: 10px 20px; font-size: 16px; font-weight: bold; color: white; background: #1a73e8; border: none; border-radius: 5px; cursor: pointer;">تحميل المزيد</button>
+        <button id="back-button" style="display: none; margin: 20px auto; padding: 10px 20px; font-size: 16px; font-weight: bold; color: white; background: #1a73e8; border: none; border-radius: 5px; cursor: pointer;">رجوع</button>
+        <button id="back-to-landing-btn" style="display: none; margin: 20px auto; padding: 10px 20px; font-size: 16px; font-weight: bold; color: white; background: #1a73e8; border: none; border-radius: 5px; cursor: pointer;">رجوع للصفحة الرئيسية</button>
+
+        <div id="video-player-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); z-index: 2000; justify-content: center; align-items: center;">
+            <div style="position: relative; width: 90%; max-width: 800px;">
+                <button id="exit-video-button" style="display: none; position: absolute; top: -50px; left: 50%; transform: translateX(-50%); background: #dc3545; color: white; border: none; border-radius: 5px; padding: 10px 20px; font-size: 16px; cursor: pointer;">خروج</button>
+                <button id="close-video-player" style="display: none; position: absolute; top: -10px; right: -10px; background: red; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 18px; cursor: pointer;">&times;</button>
+                <div class="plyr__video-embed">
+                    <iframe id="video-player-iframe" src="" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+                </div>
+            </div>
+        </div>
+        <!-- Move watermark outside so it can be reused for both video and file preview -->
+        <div id="watermark" style="position: fixed; font-size: 1.4rem; color: rgba(255, 255, 255, 0.6); font-weight: bold; animation: slowVerticalMove 30s linear infinite; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); z-index: 2147483647; pointer-events: none; display: none;">
+            <!-- Username will be dynamically inserted here -->
+        </div>
+        <style>
+            @keyframes slowVerticalMove {
+                0% {
+                    top: 10%;
+                    right: 10%;
+                    transform: translate(0, 0);
+                    opacity: 0.5;
+                }
+                50% {
+                    top: 50%;
+                    right: 50%;
+                    transform: translate(50%, -50%);
+                    opacity: 0.6;
+                }
+                100% {
+                    top: 90%;
+                    right: 90%;
+                    transform: translate(0, 0);
+                    opacity: 0.5;
+                }
+            }
+        </style>
+    </div>
+    <!-- Account Info Modal -->
+    <div id="account-info-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:5000; justify-content:center; align-items:center;">
+        <div style="background:#fff; border-radius:12px; max-width:90vw; width:350px; padding:28px 18px 18px 18px; box-shadow:0 4px 24px #0003; position:relative; text-align:right; direction:rtl;">
+            <button id="close-account-info" style="position:absolute; top:10px; left:10px; background:#dc3545; color:white; border:none; border-radius:50%; width:28px; height:28px; font-size:18px; cursor:pointer;">&times;</button>
+            <h2 style="color:#1a73e8; font-size:1.4rem; margin-bottom:18px; text-align:center;">معلومات الحساب</h2>
+            <div style="margin-bottom:12px;"><strong>الاسم:</strong> <span id="account-info-name">--</span></div>
+            <div style="margin-bottom:12px;"><strong>الإيميل:</strong> <span id="account-info-email">--</span></div>
+            <div><strong>رقم الهاتف:</strong> <span id="account-info-phone">--</span></div>
+        </div>
+    </div>
+    <!-- PDF Viewer Modal -->
+    <div id="pdf-viewer-modal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.9); z-index:4000;">
+    <button onclick="closePdfViewer()" style="position:absolute; top:10px; right:10px; background:#dc3545; color:white; border:none; border-radius:50%; width:26px; height:26px; font-size:15px; cursor:pointer; z-index:10; opacity:0.45; padding:0; line-height:1;">✖️</button>
+    <div id="pdf-container" style="width:100%; height:100%; overflow:hidden;">
+        <div id="pdf-scroll-container" style="width:100%; height:100%; overflow-y: auto; scroll-behavior: smooth;">
+            <div id="pages-container" style="display:flex; flex-direction:column; align-items:center; gap:10px; padding:20px 0;"></div>
+        </div>
+    </div>
+</div> <!-- نهاية #pdf-viewer-modal -->
+
+<!-- عنصر عرض PDF بشكل مدمج (يجب أن يكون خارج أي عنصر آخر) -->
+<div id="inline-pdf-viewer" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#fff; z-index:99999; overflow:auto; direction:rtl; padding:0; margin:0;">
+    <!-- محتوى PDF سيضاف هنا -->
+</div>
+
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore-compat.js"></script>
+<script src="firebase-init.js"></script>
+<script src="auth.js"></script>
+<script src="playlists.js"></script>
+<script src="video-player.js"></script>
+<script src="landpage.js"></script>
+<script src="utils.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
